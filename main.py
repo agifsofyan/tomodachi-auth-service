@@ -1,5 +1,5 @@
 def main():
-    print("Hello from tomodachi-service!")
+    print("Tomodachi service is running")
 
 
 if __name__ == "__main__":
