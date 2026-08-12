@@ -22,6 +22,9 @@ app = FastAPI(
     else "FastAPI Application",
     version="1.0.0",
     description="Clean Architecture FastAPI Application",
+    docs_url="/docs/auth-service",
+    redoc_url=f"/docs/auth-service/redoc",
+    openapi_url="/docs/auth-service/openapi.json",
 )
 
 register_exception_handlers(app)
