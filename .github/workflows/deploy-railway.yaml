@@ -1,17 +1,20 @@
 
 name: CI and Manual Deploy to Railway
 
+# on:
+#   push:
+#     branches:
+#       - main
+#       - master
+
+#   pull_request:
+#     branches:
+#       - main
+#       - master
+
+#   workflow_dispatch:
+
 on:
-  push:
-    branches:
-      - main
-      - master
-
-  pull_request:
-    branches:
-      - main
-      - master
-
   workflow_dispatch:
 
 permissions:
