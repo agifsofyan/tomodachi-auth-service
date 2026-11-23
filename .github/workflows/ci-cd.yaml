@@ -109,3 +109,58 @@ jobs:
             org.opencontainers.image.description=Tomodachi Auth Service
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  
+  deploy:
+    name: Update Infrastructure Manifest
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout infrastructure repository
+        uses: actions/checkout@v6
+        with:
+          repository: agifsofyan/tomodachi-infra
+          ref: main
+          token: ${{ secrets.INFRA_REPO_TOKEN }}
+          path: infra
+
+      - name: Update Auth Service image
+        working-directory: infra
+        env:
+          IMAGE_TAG: sha-${{ github.sha }}
+        run: |
+          MANIFEST="kubernetes/application/auth-service/deployment.yaml"
+
+          sed -i -E \
+            "s|(image:[[:space:]]*ghcr.io/agifsofyan/auth-service:).*|\1${IMAGE_TAG}|" \
+            "$MANIFEST"
+
+          echo "Updated image:"
+          grep 'image:' "$MANIFEST"
+
+      - name: Commit and push manifest
+        working-directory: infra
+        env:
+          IMAGE_TAG: sha-${{ github.sha }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add kubernetes/application/auth-service/deployment.yaml
+
+          if git diff --cached --quiet; then
+            echo "No changes detected."
+            exit 0
+          fi
+
+          git commit -m "deploy(auth-service): ${IMAGE_TAG}"
+          git push origin main
+
